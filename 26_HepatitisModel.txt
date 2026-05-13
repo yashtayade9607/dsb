@@ -3,7 +3,6 @@ import numpy as np
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from sklearn.impute import SimpleImputer
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import GaussianNB
@@ -24,29 +23,63 @@ columns = [
 
 df = pd.read_csv("hepatitis.csv", names=columns)
 
+print("Original Dataset")
+print(df)
+
 # ------------------------------------------------
 # STEP 2 : Data Cleaning
 # ------------------------------------------------
-df.dropna()
 
 # Replace ? with NaN
 df.replace("?", np.nan, inplace=True)
 
-# Convert to numeric
+# Convert all columns to numeric
 df = df.apply(pd.to_numeric)
 
-# Fill missing values using mean
+# Remove missing values
 df = df.dropna()
 
 # Remove negative values
 for col in df.columns:
     df = df[df[col] >= 0]
 
-print("Cleaned Dataset")
+print("\nDataset After Cleaning")
 print(df)
 
 # ------------------------------------------------
-# STEP 3 : Data Transformation
+# STEP 3 : Remove Outliers using IQR
+# ------------------------------------------------
+
+outlier_cols = [
+    "AGE",
+    "BILIRUBIN",
+    "ALK_PHOSPHATE",
+    "SGOT",
+    "ALBUMIN",
+    "PROTIME"
+]
+
+for col in outlier_cols:
+
+    Q1 = df[col].quantile(0.25)
+    Q3 = df[col].quantile(0.75)
+
+    IQR = Q3 - Q1
+
+    lower = Q1 - 1.5 * IQR
+    upper = Q3 + 1.5 * IQR
+
+    df = df[(df[col] >= lower) & (df[col] <= upper)]
+
+print("\nDataset After Removing Outliers")
+print(df)
+
+# Check remaining classes
+print("\nClass Counts")
+print(df["Class"].value_counts())
+
+# ------------------------------------------------
+# STEP 4 : Data Transformation
 # ------------------------------------------------
 
 X = df.drop("Class", axis=1)
@@ -57,7 +90,7 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # ------------------------------------------------
-# STEP 4 : Train Test Split
+# STEP 5 : Train Test Split
 # ------------------------------------------------
 
 X_train, X_test, y_train, y_test = train_test_split(
@@ -67,9 +100,8 @@ X_train, X_test, y_train, y_test = train_test_split(
     random_state=42
 )
 
-
 # ------------------------------------------------
-# STEP 5 : Logistic Regression
+# STEP 6 : Logistic Regression
 # ------------------------------------------------
 
 lr = LogisticRegression()
@@ -80,10 +112,10 @@ y_pred_lr = lr.predict(X_test)
 
 lr_acc = accuracy_score(y_test, y_pred_lr)
 
-print("\nLogistic Regression Accuracy:", lr_acc)
+print("\nLogistic Regression Accuracy :", lr_acc)
 
 # ------------------------------------------------
-# STEP 6 : Naive Bayes
+# STEP 7 : Naive Bayes
 # ------------------------------------------------
 
 nb = GaussianNB()
@@ -94,10 +126,10 @@ y_pred_nb = nb.predict(X_test)
 
 nb_acc = accuracy_score(y_test, y_pred_nb)
 
-print("Naive Bayes Accuracy:", nb_acc)
+print("Naive Bayes Accuracy         :", nb_acc)
 
 # ------------------------------------------------
-# STEP 7 : Compare Accuracy
+# STEP 8 : Accuracy Comparison
 # ------------------------------------------------
 
 print("\nAccuracy Comparison")
