@@ -1,0 +1,159 @@
+-- =====================================================
+-- ONLINE RETAIL DATASET : HIVE + HBASE COMPLETE COMMANDS
+-- =====================================================
+
+-- =====================================================
+-- CREATE DATABASE
+-- =====================================================
+
+CREATE DATABASE retail_db;
+
+USE retail_db;
+
+-- =====================================================
+-- CREATE HIVE TABLE
+-- =====================================================
+
+CREATE TABLE online_retail (
+    InvoiceNo STRING,
+    StockCode STRING,
+    Description STRING,
+    Quantity INT,
+    InvoiceDate STRING,
+    UnitPrice DOUBLE,
+    CustomerID STRING,
+    Country STRING
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+-- =====================================================
+-- LOAD DATA INTO HIVE TABLE
+-- =====================================================
+
+LOAD DATA LOCAL INPATH '/path/to/OnlineRetail.csv'
+INTO TABLE online_retail;
+
+-- =====================================================
+-- CREATE INDEX
+-- =====================================================
+
+CREATE INDEX idx_customer
+ON TABLE online_retail (CustomerID)
+AS 'COMPACT'
+WITH DEFERRED REBUILD;
+
+ALTER INDEX idx_customer
+ON online_retail REBUILD;
+
+-- =====================================================
+-- TOTAL AND AVERAGE SALES
+-- =====================================================
+
+SELECT 
+    SUM(Quantity * UnitPrice) AS total_sales,
+    AVG(Quantity * UnitPrice) AS avg_sales
+FROM online_retail;
+
+-- =====================================================
+-- ORDER DETAILS WITH MAXIMUM COST
+-- =====================================================
+
+SELECT *
+FROM online_retail
+ORDER BY (Quantity * UnitPrice) DESC
+LIMIT 1;
+
+-- =====================================================
+-- CUSTOMER WITH MAXIMUM ORDER TOTAL
+-- =====================================================
+
+SELECT CustomerID,
+       SUM(Quantity * UnitPrice) AS total_spent
+FROM online_retail
+GROUP BY CustomerID
+ORDER BY total_spent DESC
+LIMIT 1;
+
+-- =====================================================
+-- COUNTRY WITH MAXIMUM SALES
+-- =====================================================
+
+SELECT Country,
+       SUM(Quantity * UnitPrice) AS total_sales
+FROM online_retail
+GROUP BY Country
+ORDER BY total_sales DESC
+LIMIT 1;
+
+-- =====================================================
+-- COUNTRY WITH MINIMUM SALES
+-- =====================================================
+
+SELECT Country,
+       SUM(Quantity * UnitPrice) AS total_sales
+FROM online_retail
+GROUP BY Country
+ORDER BY total_sales ASC
+LIMIT 1;
+
+-- =====================================================
+-- CREATE HBASE TABLE
+-- RUN BELOW COMMANDS IN HBASE SHELL
+-- =====================================================
+
+create 'hbase_retail', 'cf'
+
+scan 'hbase_retail'
+
+-- =====================================================
+-- CREATE EXTERNAL HIVE TABLE CONNECTED TO HBASE
+-- =====================================================
+
+CREATE EXTERNAL TABLE hbase_online_retail (
+    key STRING,
+    InvoiceNo STRING,
+    StockCode STRING,
+    Description STRING,
+    Quantity INT,
+    InvoiceDate STRING,
+    UnitPrice DOUBLE,
+    CustomerID STRING,
+    Country STRING
+)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES (
+    "hbase.columns.mapping" =
+    ":key,cf:InvoiceNo,cf:StockCode,cf:Description,cf:Quantity,cf:InvoiceDate,cf:UnitPrice,cf:CustomerID,cf:Country"
+)
+TBLPROPERTIES ("hbase.table.name" = "hbase_retail");
+
+-- =====================================================
+-- INSERT DATA FROM HIVE TO HBASE
+-- =====================================================
+
+INSERT INTO TABLE hbase_online_retail
+SELECT
+    InvoiceNo,
+    InvoiceNo,
+    StockCode,
+    Description,
+    Quantity,
+    InvoiceDate,
+    UnitPrice,
+    CustomerID,
+    Country
+FROM online_retail;
+
+-- =====================================================
+-- DISPLAY RECORDS FROM HBASE THROUGH HIVE
+-- =====================================================
+
+SELECT * FROM hbase_online_retail LIMIT 10;
+
+-- =====================================================
+-- DISPLAY RECORDS DIRECTLY IN HBASE
+-- =====================================================
+
+scan 'hbase_retail'
