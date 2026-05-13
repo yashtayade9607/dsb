@@ -58,20 +58,33 @@ print(df.head())
 # (Only display outliers, not remove all)
 # -------------------------------------------------------
 
-for col in df.columns[1:-1]:
+# for col in df.columns[1:-1]:
 
-    Q1 = df[col].quantile(0.25)
-    Q3 = df[col].quantile(0.75)
+#     Q1 = df[col].quantile(0.25)
+#     Q3 = df[col].quantile(0.75)
 
-    IQR = Q3 - Q1
+#     IQR = Q3 - Q1
 
-    lower = Q1 - 1.5 * IQR
-    upper = Q3 + 1.5 * IQR
+#     lower = Q1 - 1.5 * IQR
+#     upper = Q3 + 1.5 * IQR
 
-    outliers = df[(df[col] < lower) | (df[col] > upper)]
+#     outliers = df[(df[col] < lower) | (df[col] > upper)]
 
-    print(f"\nOutliers in {col}:")
-    print(outliers.shape[0])
+#     print(f"\nOutliers in {col}:")
+#     print(outliers.shape[0])
+
+Q1 = df.quantile(0.25)
+Q3 = df.quantile(0.75)
+
+IQR = Q3 - Q1
+
+lower = Q1 - 1.5 * IQR
+upper = Q3 + 1.5 * IQR
+
+outliers = df[(df < lower) | (df > upper)]
+print(f"\nOutliers: {outliers.shape[0]}")
+# do it without loop
+df = df[((df >= lower) & (df <= upper)).all(axis=1)]
 
 # -------------------------------------------------------
 # k. Data Transformation
@@ -143,7 +156,7 @@ else:
 
 
 print("\n--- Logistic Regression Breakdown ---")
-print(classification_report(y_test, y_pred_lr, target_names=["Benign (2)", "Malignant (4)"]))
+# print(classification_report(y_test, y_pred_lr, target_names=["Benign (2)", "Malignant (4)"]))
 
-print("\n--- Naive Bayes Breakdown ---")
-print(classification_report(y_test, y_pred_nb, target_names=["Benign (2)", "Malignant (4)"]))
+# print("\n--- Naive Bayes Breakdown ---")
+# print(classification_report(y_test, y_pred_nb, target_names=["Benign (2)", "Malignant (4)"]))
