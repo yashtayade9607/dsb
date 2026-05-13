@@ -1,0 +1,106 @@
+package PackageDemo;
+
+import java.io.*;
+import java.text.*;
+import java.util.*;
+
+import org.apache.hadoop.conf.*;
+import org.apache.hadoop.fs.*;
+import org.apache.hadoop.io.*;
+import org.apache.hadoop.mapreduce.*;
+import org.apache.hadoop.mapreduce.lib.input.*;
+import org.apache.hadoop.mapreduce.lib.output.*;
+
+public class LoginTimeAnalyzer {
+
+	 public static class Map
+     extends Mapper<Object,Text,Text,IntWritable>{
+
+		 public void map(Object k, Text v, Context c)
+				 throws IOException, InterruptedException {
+
+				 try{
+
+				 String f[] = v.toString().split(",");
+
+				 if(f.length < 8)
+				 return;
+
+				 String ip = f[1].trim();
+
+				 SimpleDateFormat s =
+				 new SimpleDateFormat("d/M/yyyy H:mm");
+
+				 Date in = s.parse(f[5].trim());
+
+				 Date out = s.parse(f[7].trim());
+
+				 int min =
+				 (int)((out.getTime()-in.getTime())/(1000*60));
+
+				 c.write(new Text(ip),
+				 new IntWritable(min));
+
+				 }catch(Exception e){
+
+				 e.printStackTrace();
+
+				 }
+				 }
+}
+
+    
+	 public static class Reduce
+     extends Reducer<Text,IntWritable,
+     Text,IntWritable>{
+
+ int max=0;
+ String user="";
+
+ public void reduce(Text k,
+                    Iterable<IntWritable> v,
+                    Context c){
+
+     int t=0;
+
+     for(IntWritable i:v)
+         t+=i.get();
+     if(t>max){
+         max=t;
+         user=k.toString();
+     }
+ }
+
+ protected void cleanup(Context c)
+         throws IOException, InterruptedException {
+
+     c.write(new Text(user),
+             new IntWritable(max));
+ }
+	    }
+
+// Main Method
+public static void main(String[] args)
+    throws Exception {
+	
+	Configuration conf = new Configuration();
+
+    Job job = Job.getInstance(conf,"log");
+
+    job.setJarByClass(LoginTimeAnalyzer.class);
+
+    job.setMapperClass(Map.class);
+    job.setReducerClass(Reduce.class);
+
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(IntWritable.class);
+    FileInputFormat.addInputPath(job,
+            new Path(args[0]));
+
+    FileOutputFormat.setOutputPath(job,
+            new Path(args[1]));
+
+    System.exit(job.waitForCompletion(true)?0:1);
+    
+}
+ }

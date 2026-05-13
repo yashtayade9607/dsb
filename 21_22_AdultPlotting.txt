@@ -1,0 +1,194 @@
+# =========================================================
+# ADULT DATASET VISUALIZATION
+# =========================================================
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# =========================================================
+# LOAD DATASET
+# =========================================================
+
+# =========================================
+# Column Names
+# =========================================
+
+cols = [
+    'age',
+    'workclass',
+    'fnlwgt',
+    'education',
+    'education_num',
+    'marital_status',
+    'occupation',
+    'relationship',
+    'race',
+    'sex',
+    'capital_gain',
+    'capital_loss',
+    'hours-per-week',
+    'native_country',
+    'income'
+]
+
+# =========================================
+# Load Dataset
+# =========================================
+
+df = pd.read_csv("adult.csv", names=cols)
+
+# =========================================================
+# a. HISTOGRAM
+# Objective:
+# To show distribution of age values.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.hist(df["age"], bins=10)
+
+plt.title("Histogram of Age")
+plt.xlabel("Age")
+plt.ylabel("Frequency")
+
+plt.show()
+
+# =========================================================
+# b. DOT PLOT
+# Objective:
+# To show individual age values.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.plot(df["age"], [1]*len(df["age"]), 'o')
+
+plt.title("Dot Plot of Age")
+
+plt.yticks([])
+
+plt.show()
+
+# =========================================================
+# c. BAR PLOT
+# Objective:
+# To compare income categories.
+# =========================================================
+
+income_count = df["income"].value_counts()
+
+plt.figure(figsize=(6,4))
+
+plt.bar(income_count.index.astype(str),
+        income_count.values)
+
+plt.title("Bar Plot of Income")
+plt.xlabel("Income")
+plt.ylabel("Count")
+
+plt.show()
+
+# =========================================================
+# d. LINE CHART
+# Objective:
+# To show variation in hours-per-week values.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.plot(df["hours-per-week"], marker='o')
+
+plt.title("Line Chart of Hours Per Week")
+plt.xlabel("Index")
+plt.ylabel("Hours Per Week")
+
+plt.show()
+
+# =========================================================
+# e. HISTOGRAM + SCATTER + BOXPLOT
+# Objective:
+# To visualize age distribution together.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+# Boxplot first
+plt.boxplot(df["age"], vert=False)
+
+# Histogram added
+plt.hist(df["age"], bins=10)
+
+# Scatter added
+plt.scatter(df["age"], [1]*len(df["age"]))
+
+plt.title("Boxplot + Histogram + Scatter")
+plt.xlabel("Age")
+
+plt.show()
+
+# =========================================================
+# PIE CHART
+# Objective:
+# To show percentage of income categories.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.pie(income_count.values,
+        labels=income_count.index,
+        autopct='%.1f%%')
+
+plt.title("Pie Chart of Income")
+
+plt.show()
+
+# =========================================================
+# BOX PLOT
+# Objective:
+# To detect spread and outliers in age.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.boxplot(df["age"])
+
+plt.title("Box Plot of Age")
+plt.ylabel("Age")
+
+plt.show()
+
+# =========================================================
+# SCATTER PLOT
+# Objective:
+# To show relationship between age and hours-per-week.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.scatter(df["age"], df["hours-per-week"])
+
+plt.title("Scatter Plot")
+plt.xlabel("Age")
+plt.ylabel("Hours Per Week")
+
+plt.show()
+
+# =========================================================
+# SCATTER PLOT + BOXPLOT
+# Objective:
+# To visualize distribution with relationship.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.scatter(df["age"], df["hours-per-week"])
+
+plt.boxplot(df["hours-per-week"],
+            positions=[80],
+            widths=5)
+
+plt.title("Scatter Plot with Boxplot")
+plt.xlabel("Age")
+plt.ylabel("Hours Per Week")
+
+plt.show()

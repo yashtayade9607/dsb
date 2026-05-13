@@ -1,0 +1,49 @@
+import requests
+import pandas as pd
+from bs4 import BeautifulSoup
+
+url = "https://webscraper.io/test-sites/e-commerce/static"
+
+response = requests.get(url).text
+
+# with open("file.html", "w") as f:
+#     f.write(response)
+
+with open("file.html", "r") as f:
+    html = f.read()
+
+soup = BeautifulSoup(html, "html.parser")
+print("Data loaded in soup")
+# print(soup.prettify())
+
+reviews = soup.find_all("div", class_="card")
+
+# price = r.find("h4").span.text.strip()
+# description = r.find("p",class_="description").text.strip()
+# name = r.find("a", class_="title")["title"]
+# reviewCount = r.find("p",class_="review-count").text.strip()
+# ratings = r.find("p", attrs={"data-rating": True})["data-rating"]
+# tag = soup.find(attrs={"class": "price"})
+
+data = []
+
+for r in reviews : 
+    price = r.find("h4").span.text.strip()
+    description = r.find("p",class_="description").text.strip()
+    name = r.find("a", class_="title")["title"]
+    reviewCount = r.find("p",class_="review-count").text.strip()
+    ratings = r.find("p", attrs={"data-rating": True})["data-rating"]
+
+    data.append({
+        "Product Name" : name,
+        'Price' : price,
+        "Review Count":reviewCount,
+        "Ratings":ratings,
+        "Description":description
+    })
+    
+
+df = pd.DataFrame(data)
+df.head()
+# real time comments, reviews, ratings, comment tags, customer name
+

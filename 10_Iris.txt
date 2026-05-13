@@ -1,0 +1,37 @@
+import pandas as pd
+
+columns = ['SepalLength','SepalWidth','PetalLength','PetalWidth','Species']
+
+df=pd.read_csv("iris.csv",names = columns)
+
+# df.columns=['SepalLength','SepalWidth','PetalLength','PetalWidth','Species']
+print(df.head())
+
+
+setosa=df[df['Species']=='Iris-setosa']
+virginica = df[df['Species'] == 'Iris-virginica']
+versicolor=df[df['Species']=='Iris-versicolor']
+print("Subsets:")
+print(setosa.head())
+print(versicolor.head())
+print(virginica.head())
+
+
+
+merged = pd.concat([setosa,versicolor, virginica])
+print(merged.head())
+print(merged.tail())
+
+
+sorted_data = df.sort_values(by='PetalLength')
+print(sorted_data.head())
+
+transpose = df.transpose()
+print(transpose.head())
+
+melted=pd.melt(df,id_vars=['Species'],value_vars=['SepalLength','PetalLength'])
+print(melted.head())
+
+
+casting = melted.pivot_table(index='Species', columns='variable', values='value', aggfunc="mean")
+print(casting.head())

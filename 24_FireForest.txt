@@ -1,0 +1,115 @@
+# =========================================================
+# Forest Fires Dataset Operations
+# =========================================================
+
+import pandas as pd
+
+# ---------------------------------------------------------
+# Load Dataset
+# ---------------------------------------------------------
+
+df = pd.read_csv("forestfires.csv")
+
+print("Original Dataset")
+print(df)
+
+
+# a. Create data subsets by making classes for amount of region affected.(e.g. NotAffected, Partially affected, Mostlyaffected).
+# b. Merge two subsets
+# c. Sort Data using Temperature, wind and area.
+# d. Transposing Data
+# e. Melting Data to long format
+# f. Casting data to wide format
+
+
+# =========================================================
+# a. Create Data Subsets using Area Classes
+# =========================================================
+
+# Create classes based on area affected
+
+def area_class(area):
+    
+    if area == 0:
+        return "NotAffected"
+    
+    elif area <= 10:
+        return "PartiallyAffected"
+    
+    else:
+        return "MostlyAffected"
+
+df["DamageClass"] = df["area"].apply(area_class)
+
+print("\nDataset with Damage Classes")
+print(df[["area", "DamageClass"]])
+
+# Create subsets
+
+not_affected = df[df["DamageClass"] == "NotAffected"]
+
+partially_affected = df[df["DamageClass"] == "PartiallyAffected"]
+
+mostly_affected = df[df["DamageClass"] == "MostlyAffected"]
+
+print("\nNot Affected Subset")
+print(not_affected)
+
+print("\nPartially Affected Subset")
+print(partially_affected)
+
+print("\nMostly Affected Subset")
+print(mostly_affected)
+
+# =========================================================
+# b. Merge Two Subsets
+# =========================================================
+
+merged_subset = pd.concat([not_affected, partially_affected])
+
+print("\nMerged Subset")
+print(merged_subset)
+
+# =========================================================
+# c. Sort Data using Temperature, Wind and Area
+# =========================================================
+
+sorted_df = df.sort_values(by=["temp", "wind", "area"])
+
+print("\nSorted Dataset")
+print(sorted_df)
+
+# =========================================================
+# d. Transposing Data
+# =========================================================
+
+transpose_df = df.transpose()
+
+print("\nTransposed Data")
+print(transpose_df)
+
+# =========================================================
+# e. Melting Data to Long Format
+# =========================================================
+
+melt_df = pd.melt(
+    df,
+    id_vars=["month", "day"],
+    value_vars=["temp", "wind", "RH"]
+)
+
+print("\nMelted Data (Long Format)")
+print(melt_df)
+
+# =========================================================
+# f. Casting Data to Wide Format
+# =========================================================
+
+wide_df = melt_df.pivot(
+    index=["month", "day"],
+    columns="variable",
+    values="value"
+)
+
+print("\nWide Format Data")
+print(wide_df)

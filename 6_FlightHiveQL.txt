@@ -1,0 +1,88 @@
+# ================================
+# HBASE COMMANDS
+# ================================
+
+# Create HBase Table
+create 'FlightInfo', 'info', 'schedule', 'delay'
+
+# Insert Flight Data
+put 'FlightInfo', 'F101', 'info:name', 'Air India'
+put 'FlightInfo', 'F101', 'info:source', 'Mumbai'
+put 'FlightInfo', 'F101', 'info:destination', 'Delhi'
+
+put 'FlightInfo', 'F101', 'schedule:departure', '10:00'
+put 'FlightInfo', 'F101', 'schedule:arrival', '12:00'
+
+put 'FlightInfo', 'F101', 'delay:departure_delay', '30'
+put 'FlightInfo', 'F101', 'delay:arrival_delay', '20'
+
+# View Data
+scan 'FlightInfo'
+
+# List Tables
+list
+
+# Describe Table
+describe 'FlightInfo'
+
+# Alter Table (Add New Column Family)
+alter 'FlightInfo', 'status'
+
+# Insert Status Data
+put 'FlightInfo', 'F101', 'status:current', 'Delayed'
+
+# Disable Table
+disable 'FlightInfo'
+
+# Drop Table
+drop 'FlightInfo'
+
+
+# ================================
+# HIVE COMMANDS
+# ================================
+
+# Create Database
+create database FlightDB;
+
+# Use Database
+use FlightDB;
+
+# Create External Hive Table Connected to HBase
+CREATE EXTERNAL TABLE flight_hive (
+    flight_id STRING,
+    name STRING,
+    source STRING,
+    destination STRING,
+    departure STRING,
+    arrival STRING,
+    departure_delay INT,
+    arrival_delay INT
+)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES (
+"hbase.columns.mapping" =
+":key,info:name,info:source,info:destination,
+schedule:departure,schedule:arrival,
+delay:departure_delay,delay:arrival_delay"
+)
+TBLPROPERTIES ("hbase.table.name" = "FlightInfo");
+
+# Find Total Departure Delay
+SELECT SUM(departure_delay) AS total_delay
+FROM flight_hive;
+
+# Find Average Departure Delay
+SELECT AVG(departure_delay) AS average_delay
+FROM flight_hive;
+
+# Create Index
+CREATE INDEX flight_index
+ON TABLE flight_hive (name)
+AS 'org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler'
+WITH DEFERRED REBUILD;
+
+# Rebuild Index
+ALTER INDEX flight_index
+ON flight_hive
+REBUILD;

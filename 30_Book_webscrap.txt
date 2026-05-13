@@ -1,0 +1,39 @@
+from bs4 import BeautifulSoup
+import requests
+import pandas as pd
+
+url = "https://books.toscrape.com"
+response = requests.get(url).text
+
+# print(response)
+
+# with open("file.html", "w") as f:
+#     f.write(response)
+
+with open("file.html", "r") as f:
+    html = f.read()
+
+soup = BeautifulSoup(html, "html.parser")
+# print (soup.prettify())
+
+data = []
+books = soup.find_all('article' , class_='product_pod')
+
+for book in books:
+    name = book.h3.a['title']
+    price = book.find( 'p' , class_='price_color').text.strip()
+    price = price[1:]
+    rating = book.find("p")["class"][1]
+    availability = book.find("p" , class_="instock availability").text.strip()
+
+    data.append({
+        "Customer Name" : "Book Reader",
+        "name" : name ,
+        "price" : price ,
+        "rating" : rating, 
+        "Availability" : availability ,
+    })
+
+df = pd.DataFrame(data)
+df.to_csv("Books.csv", index=False)
+df.head()

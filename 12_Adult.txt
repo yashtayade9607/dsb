@@ -1,0 +1,106 @@
+import pandas as pd
+
+# =========================================
+# Column Names
+# =========================================
+
+cols = [
+    'age',
+    'workclass',
+    'fnlwgt',
+    'education',
+    'education_num',
+    'marital_status',
+    'occupation',
+    'relationship',
+    'race',
+    'sex',
+    'capital_gain',
+    'capital_loss',
+    'hours_per_week',
+    'native_country',
+    'income'
+]
+
+# =========================================
+# Load Dataset
+# =========================================
+
+df = pd.read_csv("adult.csv", names=cols)
+
+print("Original Dataset")
+print(df.head())
+
+print("\nColumn Names")
+print(df.columns)
+
+# =========================================
+# s. Create subsets for Country, Sex, Race
+# =========================================
+
+india = df[df['native_country'] == 'India']
+male = df[df['sex'] == 'Male']
+white = df[df['race'] == 'White']
+
+print("\nIndia Subset")
+print(india.head())
+
+print("\nMale Subset")
+print(male.head())
+
+print("\nWhite Race Subset")
+print(white.head())
+
+# =========================================
+# t. Merge Two Subsets
+# =========================================
+
+merged_data = pd.concat([india, male])
+
+print("\nMerged Data")
+print(merged_data.head())
+
+# =========================================
+# u. Sort Data using Hours Per Week
+# =========================================
+
+sorted_data = df.sort_values(by='hours_per_week')
+
+print("\nSorted Data")
+print(sorted_data.head())
+
+# =========================================
+# v. Transposing Data
+# =========================================
+
+transposed_data = df.T
+
+print("\nTransposed Data")
+print(transposed_data.head())
+
+# =========================================
+# w. Melting Data to Long Format
+# =========================================
+
+melted_data = pd.melt(
+    df,
+    id_vars=['sex'],
+    value_vars=['age', 'hours_per_week']
+)
+
+print("\nMelted Data")
+print(melted_data.head())
+
+# =========================================
+# x. Casting Data to Wide Format
+# =========================================
+
+wide_data = melted_data.pivot_table(
+    index='sex',
+    columns='variable',
+    values='value',
+    aggfunc='mean'
+)
+
+print("\nWide Format Data")
+print(wide_data)

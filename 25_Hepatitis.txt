@@ -1,0 +1,119 @@
+# =========================================================
+# Hepatitis Dataset Operations
+# =========================================================
+
+import pandas as pd
+
+# ---------------------------------------------------------
+# Column Names
+# ---------------------------------------------------------
+
+columns = [
+    "Class", "AGE", "SEX", "STEROID", "ANTIVIRALS",
+    "FATIGUE", "MALAISE", "ANOREXIA", "LIVER_BIG",
+    "LIVER_FIRM", "SPLEEN_PALPABLE", "SPIDERS",
+    "ASCITES", "VARICES", "BILIRUBIN", "ALK_PHOSPHATE",
+    "SGOT", "ALBUMIN", "PROTIME", "HISTOLOGY"
+]
+
+# ---------------------------------------------------------
+# Load Dataset
+# ---------------------------------------------------------
+
+df = pd.read_csv("hepatitis.csv", names=columns)
+
+print("Original Dataset")
+print(df)
+
+# =========================================================
+# Data Cleaning
+# =========================================================
+
+# Replace ? with NaN
+
+df.replace("?", pd.NA, inplace=True)
+
+# Convert numeric columns
+
+numeric_cols = ["AGE", "SGOT", "PROTIME"]
+
+# for col in numeric_cols:
+#     df[col] = pd.to_numeric(df[col], errors="coerce")
+
+for col in numeric_cols:
+    df[col] = df[col].astype(float)
+
+print("\nCleaned Dataset")
+print(df)
+
+# =========================================================
+# a. Create Data Subsets for Different Sex
+# =========================================================
+
+# SEX:
+# 1 = Male
+# 2 = Female
+
+male_subset = df[df["SEX"] == 1]
+
+female_subset = df[df["SEX"] == 2]
+
+print("\nMale Subset")
+print(male_subset)
+
+print("\nFemale Subset")
+print(female_subset)
+
+# =========================================================
+# b. Merge Two Subsets
+# =========================================================
+
+merged_subset = pd.concat([male_subset, female_subset])
+
+print("\nMerged Subset")
+print(merged_subset)
+
+# =========================================================
+# c. Sort Data using AGE, SGOT, PROTIME
+# =========================================================
+
+sorted_df = df.sort_values(by=["AGE", "SGOT", "PROTIME"])
+
+print("\nSorted Dataset")
+print(sorted_df)
+
+# =========================================================
+# d. Transposing Data
+# =========================================================
+
+transpose_df = df.transpose()
+
+print("\nTransposed Data")
+print(transpose_df)
+
+# =========================================================
+# e. Melting Data to Long Format
+# =========================================================
+
+melt_df = pd.melt(
+    df,
+    id_vars=["AGE", "SEX"],
+    value_vars=["SGOT", "PROTIME", "ALBUMIN"]
+)
+
+print("\nMelted Data (Long Format)")
+print(melt_df)
+
+# =========================================================
+# f. Casting Data to Wide Format
+# =========================================================
+
+wide_df = melt_df.pivot_table(
+    index=["AGE", "SEX"],
+    columns="variable",
+    values="value",
+    aggfunc="first"
+)
+
+print("\nWide Format Data")
+print(wide_df)

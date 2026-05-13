@@ -1,0 +1,70 @@
+import pandas as pd
+
+# Load Dataset
+df = pd.read_csv("movies_metadata.csv", low_memory=False)
+
+# =========================================
+# m. Create subsets for different languages
+# =========================================
+
+english = df[df['original_language'] == 'en']
+french = df[df['original_language'] == 'fr']
+
+print("English Movies")
+print(english.head())
+
+print("\nFrench Movies")
+print(french.head())
+
+# =========================================
+# n. Merge two subsets
+# =========================================
+
+merged = pd.concat([english, french])
+
+print("\nMerged Data")
+print(merged.head())
+
+# =========================================
+# o. Sort using customer ratings
+# =========================================
+
+sorted_data = df.sort_values(by='vote_average', ascending=False)
+
+print("\nSorted by Ratings")
+print(sorted_data[['title', 'vote_average']].head())
+
+# =========================================
+# p. Transpose Data
+# =========================================
+
+transpose_data = df.head().transpose()
+
+print("\nTransposed Data")
+print(transpose_data)
+
+# =========================================
+# q. Melting Data to long format
+# =========================================
+
+melted = pd.melt(
+    df.head(),
+    id_vars=['title'],
+    value_vars=['vote_average', 'vote_count']
+)
+
+print("\nMelted Data")
+print(melted)
+
+# =========================================
+# r. Casting Data to wide format
+# =========================================
+
+casted = melted.pivot(
+    index='title',
+    columns='variable',
+    values='value'
+)
+
+print("\nCasted Data (Wide Format)")
+print(casted)

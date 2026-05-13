@@ -1,0 +1,189 @@
+# =========================================================
+# HEART DISEASE DATA VISUALIZATION USING read_csv()
+# =========================================================
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# =========================================================
+# LOAD DATASET
+# =========================================================
+
+columns = [
+    "age","sex","cp","trestbps","chol","fbs",
+    "restecg","thalach","exang","oldpeak",
+    "slope","ca","thal","target"
+]
+
+df = pd.read_csv("Cleavland.csv", names=columns)
+
+print(df.head())
+
+
+df.replace(['?', ' ?'], np.nan, inplace=True)
+
+df.dropna(inplace=True)
+
+df.drop_duplicates(inplace=True)
+
+# =========================================================
+# a. HISTOGRAM
+# Objective:
+# To show distribution of cholesterol values.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.hist(df["chol"], bins=5)
+
+plt.title("Histogram of Cholesterol")
+plt.xlabel("Cholesterol")
+plt.ylabel("Frequency")
+
+plt.show()
+
+# =========================================================
+# b. DOT PLOT
+# Objective:
+# To show individual age values.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.plot(df["age"], [1]*len(df["age"]), 'o')
+
+plt.title("Dot Plot of Age")
+plt.xlabel("Age")
+
+plt.yticks([])
+
+plt.show()
+
+# plt.plot(df["age"], 'o')
+
+# plt.title("Dot Plot of Age")
+
+# plt.show()
+
+# =========================================================
+# c. BAR PLOT
+# Objective:
+# To compare heart disease target values.
+# =========================================================
+
+target_count = df["target"].value_counts()
+
+plt.figure(figsize=(6,4))
+
+plt.bar(target_count.index.astype(str),
+        target_count.values)
+
+plt.title("Bar Plot of Heart Disease")
+plt.xlabel("Target")
+plt.ylabel("Count")
+
+plt.show()
+
+# =========================================================
+# d. LINE CHART
+# Objective:
+# To show cholesterol variation.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.plot(df["chol"], marker='o')
+
+plt.title("Line Chart of Cholesterol")
+plt.xlabel("Patient Index")
+plt.ylabel("Cholesterol")
+
+plt.show()
+
+# =========================================================
+# e. HISTOGRAM + SCATTER + BOXPLOT
+# Objective:
+# To visualize cholesterol distribution together.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.hist(df["chol"], bins=5)
+
+plt.scatter(df["chol"], [1]*len(df["chol"]))
+
+plt.boxplot(df["chol"], vert=False)
+
+plt.title("Histogram + Scatter + Boxplot")
+plt.xlabel("Cholesterol")
+
+plt.show()
+
+# =========================================================
+# PIE CHART
+# Objective:
+# To show percentage of heart disease classes.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.pie(target_count.values,
+        labels=target_count.index,
+        autopct='%1.1f%%')
+
+# plt.pie(target_count.values,
+#         labels=target_count.index)
+
+plt.title("Pie Chart of Heart Disease")
+
+plt.show()
+
+# =========================================================
+# BOX PLOT
+# Objective:
+# To detect outliers in age.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.boxplot(df["age"])
+
+plt.title("Box Plot of Age")
+plt.ylabel("Age")
+
+plt.show()
+
+# =========================================================
+# SCATTER PLOT
+# Objective:
+# To show relationship between age and cholesterol.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.scatter(df["age"], df["chol"])
+
+plt.title("Scatter Plot")
+plt.xlabel("Age")
+plt.ylabel("Cholesterol")
+
+plt.show()
+
+# =========================================================
+# SCATTER PLOT + BOXPLOT
+# Objective:
+# To visualize cholesterol spread with age relation.
+# =========================================================
+
+plt.figure(figsize=(6,4))
+
+plt.scatter(df["age"], df["chol"])
+
+plt.boxplot(df["chol"], positions=[80], widths=2)
+
+plt.title("Scatter Plot with Boxplot")
+plt.xlabel("Age")
+plt.ylabel("Cholesterol")
+
+plt.show()

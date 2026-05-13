@@ -1,0 +1,228 @@
+-- =====================================
+-- HIVE COMMANDS
+-- =====================================
+
+-- Create Database
+create database CustomerDB;
+
+-- Use Database
+use CustomerDB;
+
+-- =====================================
+-- Create customer_info Table
+-- =====================================
+
+CREATE TABLE customer_info (
+    cust_id INT,
+    cust_name STRING,
+    order_id INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+CREATE TABLE customer_info (
+    cust_id INT,
+    cust_name STRING,
+    order_id INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ','
+STORED AS TEXTFILE;
+
+
+-- =====================================
+-- Create order_info Table
+-- =====================================
+
+CREATE TABLE order_info (
+    order_id INT,
+    item_id INT,
+    quantity INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+-- =====================================
+-- Create item_info Table
+-- =====================================
+
+CREATE TABLE item_info (
+    item_id INT,
+    item_name STRING,
+    item_price INT
+)
+ROW FORMAT DELIMITED
+FIELDS TERMINATED BY ',';
+
+-- =====================================
+-- Load Data into Tables
+-- =====================================
+
+LOAD DATA LOCAL INPATH '/home/cloudera/customer.txt'
+INTO TABLE customer_info;
+
+LOAD DATA LOCAL INPATH '/home/cloudera/order.txt'
+INTO TABLE order_info;
+
+LOAD DATA LOCAL INPATH '/home/cloudera/item.txt'
+INTO TABLE item_info;
+
+-- =====================================
+-- View Table Data
+-- =====================================
+
+select * from customer_info;
+
+select * from order_info;
+
+select * from item_info;
+
+-- =====================================
+-- Join Tables
+-- =====================================
+
+SELECT
+c.cust_id,
+c.cust_name,
+o.order_id,
+i.item_name,
+o.quantity,
+i.item_price,
+(o.quantity * i.item_price) AS total_cost
+
+FROM customer_info c
+
+JOIN order_info o
+ON c.order_id = o.order_id
+
+JOIN item_info i
+ON o.item_id = i.item_id;
+
+-- =====================================
+-- Create Index
+-- =====================================
+
+CREATE INDEX customer_index
+ON TABLE customer_info(cust_name)
+AS 'org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler'
+WITH DEFERRED REBUILD;
+
+-- =====================================
+-- Rebuild Index
+-- =====================================
+
+ALTER INDEX customer_index
+ON customer_info
+REBUILD;
+
+-- =====================================
+-- Find Total Sales
+-- =====================================
+
+SELECT SUM(o.quantity * i.item_price) AS total_sales
+
+FROM order_info o
+
+JOIN item_info i
+ON o.item_id = i.item_id;
+
+-- =====================================
+-- Find Average Sales
+-- =====================================
+
+SELECT AVG(o.quantity * i.item_price) AS average_sales
+
+FROM order_info o
+
+JOIN item_info i
+ON o.item_id = i.item_id;
+
+-- =====================================
+-- Find Maximum Cost Order
+-- =====================================
+
+SELECT
+c.cust_name,
+o.order_id,
+i.item_name,
+o.quantity,
+(i.item_price * o.quantity) AS total_cost
+
+FROM customer_info c
+
+JOIN order_info o
+ON c.order_id = o.order_id
+
+JOIN item_info i
+ON o.item_id = i.item_id
+
+ORDER BY total_cost DESC
+LIMIT 1;
+
+-- =====================================
+-- HBASE COMMANDS
+-- =====================================
+
+create 'CustomerInfo', 'customer', 'order', 'item'
+
+put 'CustomerInfo', '1', 'customer:name', 'Rahul'
+
+put 'CustomerInfo', '1', 'order:orderid', '101'
+
+put 'CustomerInfo', '1', 'item:itemname', 'Laptop'
+
+put 'CustomerInfo', '1', 'item:price', '50000'
+
+scan 'CustomerInfo'
+
+-- =====================================
+-- EXTERNAL HIVE TABLE CONNECTED TO HBASE
+-- =====================================
+
+CREATE EXTERNAL TABLE customer_hbase (
+    cust_id STRING,
+    cust_name STRING,
+    order_id STRING,
+    item_name STRING,
+    item_price STRING
+)
+
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+
+WITH SERDEPROPERTIES (
+"hbase.columns.mapping" =
+":key,customer:name,order:orderid,item:itemname,item:price"
+)
+
+TBLPROPERTIES ("hbase.table.name" = "CustomerInfo");
+
+-- =====================================
+-- View HBase Data through Hive
+-- =====================================
+
+select * from customer_hbase;
+
+
+
+
+
+customer.txt
+1,Rahul,101
+2,Amit,102
+3,Priya,103
+4,Sneha,104
+5,Rohan,105
+
+order.txt
+101,201,2
+102,202,1
+103,203,5
+104,204,3
+105,205,4
+
+item.txt
+201,Laptop,50000
+202,Mobile,20000
+203,Mouse,500
+204,Keyboard,1000
+205,Monitor,15000
